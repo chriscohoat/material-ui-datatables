@@ -14,6 +14,7 @@ import IconButton from 'material-ui/IconButton';
 import TextField from 'material-ui/TextField';
 import PersonAdd from 'material-ui/svg-icons/social/person-add';
 import InfoOutline from 'material-ui/svg-icons/action/info-outline';
+import FilterListIcon from 'material-ui/svg-icons/content/filter-list';
 import {deepOrange500} from 'material-ui/styles/colors';
 
 import {
@@ -84,6 +85,10 @@ describe('<DataTables />', function() {
       expect(dataRows.getNodes()[3].props.children[6].props.children).to.equal('14%');
       expect(dataRows.getNodes()[3].props.children[7].props.children).to.equal('1%');
     });
+    it('should render data columns render function', function() {
+      const dataRows = wrapper.find(DataTablesRow);
+      expect(dataRows.getNodes()[2].props.children[2].props.children).to.equal('6.0');
+    });
     it('should render row size label', function() {
       const rowSizeLabelWrapper = wrapper.find({style: styles.footerToolbarItem}).getNodes()[0];
       expect(rowSizeLabelWrapper.props.children.props.children).to.equal('Rows per page:');
@@ -108,6 +113,9 @@ describe('<DataTables />', function() {
     });
     it('should not render checkboxes', function() {
       expect(wrapper.find('[type="checkbox"]')).to.have.length(0);
+    });
+    it('should render footer toolbar', function() {
+      expect(wrapper.find({style: styles.footerToolbar})).to.have.length(1);
     });
   });
 
@@ -238,8 +246,12 @@ describe('<DataTables />', function() {
       wrapper.find(DataTablesRowColumn).first().simulate('click');
       expect(handleCellDoubleClick).to.have.property('callCount', 1);
     });
-    it('should call filter value change handler', function(done) {
+    it('should call filter value change handler and set focus to input', function(done) {
       wrapper.find(DataTablesHeaderToolbar).find(IconButton).simulate('click');
+      const inputNodeInstanceId = Object.keys(wrapper.find(DataTablesHeaderToolbar).find(TextField).find('input').getDOMNode())[0];
+      const inputDomId = wrapper.find(DataTablesHeaderToolbar).find(TextField).find('input').getDOMNode()[inputNodeInstanceId]._domID;
+      const activeElementDomId = document.activeElement[inputNodeInstanceId]._domID;
+      expect(inputDomId).to.equal(activeElementDomId);
       wrapper.find(DataTablesHeaderToolbar).find(TextField).find('input')
           .simulate('change', {target: {value: 'dummy'}});
       setTimeout(() => {
@@ -355,6 +367,7 @@ describe('<DataTables />', function() {
 
     it('should render custom tool bar icons', function() {
       expect(wrapper.find(DataTablesHeaderToolbar).find(IconButton)).to.have.length(3);
+      expect(wrapper.find(DataTablesHeaderToolbar).find(FilterListIcon)).to.have.length(1);
       expect(wrapper.find(DataTablesHeaderToolbar).find(PersonAdd)).to.have.length(1);
       expect(wrapper.find(DataTablesHeaderToolbar).find(InfoOutline)).to.have.length(1);
     });
@@ -506,6 +519,178 @@ describe('<DataTables />', function() {
       wrapper.find(DataTablesRowColumn).first().simulate('click');
       wrapper.find(DataTablesRowColumn).first().simulate('click');
       expect(handleCellDoubleClick).to.have.property('callCount', 1);
+    });
+  });
+
+  describe('row size controls', function() {
+    const muiTheme = getMuiTheme();
+    describe('when showRowSizeControls = false', function() {
+      let wrapper;
+      before(function() {
+        wrapper = mount(
+          <DataTables
+            height={'auto'}
+            selectable={true}
+            showRowHover={true}
+            columns={TABLE_COLUMNS_CLASSNAME}
+            data={TABLE_DATA}
+            multiSelectable={true}
+            showCheckboxes={true}
+            enableSelectAll={true}
+            showRowSizeControls={false}
+            page={1}
+            count={11}
+          />,
+          {
+            context: {muiTheme: muiTheme},
+            childContextTypes: {muiTheme: PropTypes.object},
+          }
+        );
+      });
+
+      it('should not render row size label', function() {
+        expect(wrapper.find({style: styles.footerToolbarItem})).to.have.length(2);
+      });
+
+      it('should not render row size menu', function() {
+        expect(wrapper.find(DropDownMenu)).to.have.length(0);
+      });
+
+      it('should not render any row size items', function() {
+        const rowSizeItems = wrapper.find(MenuItem);
+        expect(rowSizeItems).to.have.length(0);
+      });
+    });
+
+    describe( 'when rowSizeList is empty', function() {
+      let wrapper;
+      before(function() {
+        wrapper = mount(
+          <DataTables
+            height={'auto'}
+            selectable={true}
+            showRowHover={true}
+            columns={TABLE_COLUMNS_CLASSNAME}
+            data={TABLE_DATA}
+            multiSelectable={true}
+            showCheckboxes={true}
+            enableSelectAll={true}
+            page={1}
+            count={11}
+            rowSizeList={[]}
+            rowSize={10}
+          />,
+          {
+            context: {muiTheme: muiTheme},
+            childContextTypes: {muiTheme: PropTypes.object},
+          }
+        );
+      });
+
+      it('should render row size label', function() {
+        expect(wrapper.find({style: styles.footerToolbarItem})).to.have.length(3);
+      });
+
+      it('should not render row size menu', function() {
+        expect(wrapper.find(DropDownMenu)).to.have.length(0);
+      });
+    });
+  });
+
+  describe('Disable footer toolbar', function() {
+    let wrapper;
+    const muiTheme = getMuiTheme();
+
+    before(function() {
+      // full rendering
+      wrapper = mount(
+        <DataTables
+          height={'auto'}
+          showRowHover={true}
+          columns={TABLE_COLUMNS_CLASSNAME}
+          data={TABLE_DATA}
+          multiSelectable={true}
+          showCheckboxes={true}
+          enableSelectAll={true}
+          page={1}
+          count={11}
+          showFooterToolbar={false}
+        />,
+        {
+          context: {muiTheme: muiTheme},
+          childContextTypes: {muiTheme: PropTypes.object},
+        }
+      );
+    });
+
+    it('should not render footer toolbar', function() {
+      expect(wrapper.find({style: styles.footerToolbar})).to.have.length(0);
+    });
+  });
+
+  describe('Header toolbar mode', function() {
+    let wrapper;
+    const muiTheme = getMuiTheme();
+
+    before(function() {
+      // full rendering
+      wrapper = mount(
+        <DataTables
+          height={'auto'}
+          showRowHover={true}
+          columns={TABLE_COLUMNS_CLASSNAME}
+          data={TABLE_DATA}
+          multiSelectable={true}
+          showCheckboxes={true}
+          enableSelectAll={true}
+          showHeaderToolbar={true}
+          headerToolbarMode={'filter'}
+          filterValue={'test'}
+          page={1}
+          count={11}
+        />,
+        {
+          context: {muiTheme: muiTheme},
+          childContextTypes: {muiTheme: PropTypes.object},
+        }
+      );
+    });
+
+    it('should render header toolbar with filter mode', function() {
+      expect(wrapper.find(DataTablesHeaderToolbar).prop('mode')).to.equal('filter');
+      expect(wrapper.find(DataTablesHeaderToolbar).prop('filterValue')).to.equal('test');
+    });
+  });
+
+  describe('Hide filter icon', function() {
+    let wrapper;
+    const muiTheme = getMuiTheme();
+
+    before(function() {
+      // full rendering
+      wrapper = mount(
+        <DataTables
+          height={'auto'}
+          showRowHover={true}
+          columns={TABLE_COLUMNS_CLASSNAME}
+          data={TABLE_DATA}
+          multiSelectable={false}
+          showHeaderToolbar={true}
+          showCheckboxes={false}
+          enableSelectAll={false}
+          showFooterToolbar={true}
+          count={10}
+          showHeaderToolbarFilterIcon={false}
+        />,
+        {
+          context: {muiTheme: muiTheme},
+          childContextTypes: {muiTheme: PropTypes.object},
+        }
+      );
+    });
+
+    it('should not render filter icon in header toolbar', function() {
+      expect(wrapper.find(DataTablesHeaderToolbar).find(FilterListIcon)).to.have.length(0);
     });
   });
 });

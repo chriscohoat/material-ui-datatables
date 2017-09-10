@@ -123,6 +123,7 @@ const TABLE_COLUMNS_SORT_STYLE = [
   }, {
     key: 'fat',
     label: 'Fat (g)',
+    alignRight: true,
   }, {
     key: 'carbs',
     label: 'Carbs (g)',
@@ -518,6 +519,68 @@ class Main extends Component {
                 showCheckboxes={false}
                 enableSelectAll={false}
                 count={11}
+              />
+            </Card>
+          </div>
+          <div style={styles.component}>
+            <h2>DataTables (Disable footer toolbar)</h2>
+            <Card style={{margin: 12, textAlign: 'left'}}>
+              <CardHeader
+                title='Nutrition'
+                titleStyle={{fontSize: 20}}
+              />
+              <DataTables
+                height={'auto'}
+                selectable={false}
+                showRowHover={true}
+                columns={TABLE_COLUMNS}
+                data={TABLE_DATA}
+                multiSelectable={false}
+                showCheckboxes={false}
+                enableSelectAll={false}
+                showFooterToolbar={false}
+                count={11}
+              />
+            </Card>
+          </div>
+          <div style={styles.component}>
+            <h2>DataTables (Header toolbar mode)</h2>
+            <Card style={{margin: 12, textAlign: 'left'}}>
+              <DataTables
+                title={'Nutrition'}
+                height={'auto'}
+                selectable={false}
+                showRowHover={true}
+                columns={TABLE_COLUMNS}
+                data={TABLE_DATA}
+                multiSelectable={false}
+                showHeaderToolbar={true}
+                showCheckboxes={false}
+                enableSelectAll={false}
+                showFooterToolbar={true}
+                count={10}
+                headerToolbarMode={'filter'}
+                filterValue={'test'}
+              />
+            </Card>
+          </div>
+          <div style={styles.component}>
+            <h2>DataTables (Hide filter icon)</h2>
+            <Card style={{margin: 12, textAlign: 'left'}}>
+              <DataTables
+                title={'Nutrition'}
+                height={'auto'}
+                selectable={false}
+                showRowHover={true}
+                columns={TABLE_COLUMNS}
+                data={TABLE_DATA}
+                multiSelectable={false}
+                showHeaderToolbar={true}
+                showCheckboxes={false}
+                enableSelectAll={false}
+                showFooterToolbar={true}
+                count={10}
+                showHeaderToolbarFilterIcon={false}
               />
             </Card>
           </div>
